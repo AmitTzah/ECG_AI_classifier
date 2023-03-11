@@ -70,6 +70,7 @@ fig.suptitle("Diagnostic Code Histograms")
 plt.xlabel("Diagnostic Code")
 plt.ylabel("Number of Patients")
 
+
 # Add the top 7 diagnoses as text annotations to each chart
 for i, ax in enumerate(axs):
     text = "\n".join([f"{dx}: {count}" for dx, count in [
@@ -77,6 +78,16 @@ for i, ax in enumerate(axs):
     ax.text(0.5, 0.95, text, transform=ax.transAxes, va='top', ha='center')
 
 
+# use the Dx_map.csv file to get the full name of the diagnosis
+# and add it to the chart
+with open("Dx_map.csv", 'r') as f:
+    dx_map = {line.split(",")[1].strip(): line.split(",")[0]
+              for line in f.readlines()}
+
+
+for i, ax in enumerate(axs):
+    for dx, count in [top_diagnoses1, top_diagnoses2, top_diagnoses3][i]:
+        ax.text(dx, count, dx_map[dx], ha='center', va='bottom')
 
 
 plt.show()
