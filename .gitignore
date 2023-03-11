@@ -1,3 +1,5 @@
 data/
 training_folder/
 validation_folder/
+unit_tests/
+test_code/
