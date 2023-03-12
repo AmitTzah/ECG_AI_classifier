@@ -6,3 +6,9 @@ test_code/
 data_distribution.png
 training_distribution.png
 validation_distribution.png
+Y_test.npy
+Y_train.npy
+X_test.npy
+X_train.npy
+best_knn.joblib
+knn_accuracy_graph.png
