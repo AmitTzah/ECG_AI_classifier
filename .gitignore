@@ -3,3 +3,6 @@ training_folder/
 validation_folder/
 unit_tests/
 test_code/
+data_distribution.png
+training_distribution.png
+validation_distribution.png
