@@ -1,4 +1,5 @@
 # using KNN to classify the ECG data
+# generate a knn model with the best K value and save it as a joblib file
 
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
@@ -22,7 +23,8 @@ k_range = list(range(1, 20))
 # create a parameter grid: map the parameter names to the values that should be searched
 param_grid = dict(n_neighbors=k_range)
 # instantiate the grid, activate the progress bar
-grid = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, verbose=10)
+grid = GridSearchCV(
+    , param_grid, cv=10, verbose=10)
 # fit the grid with data
 grid.fit(X_train, Y_train)
 # examine the best model
