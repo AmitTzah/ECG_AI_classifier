@@ -7,11 +7,9 @@ from joblib import dump, load
 from sklearn.model_selection import GridSearchCV
 import numpy as np
 
-#  Y_test, Y_train, X_test, X_train are saved in the root folder as .npy files
+#  Y_test, Y_train, are saved in the root folder as .npy files
 #  load them using np.load()
-Y_test = np.load('Y_test.npy')
 Y_train = np.load('Y_train.npy')
-X_test = np.load('X_test.npy')
 X_train = np.load('X_train.npy')
 
 
