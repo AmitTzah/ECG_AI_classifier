@@ -71,11 +71,15 @@ for i, ax in enumerate(axes):
     ax.set_xlabel("Predicted Label")
     ax.set_ylabel("True Label")
     ax.xaxis.set_ticklabels(['', '0', '1'])
-    ax.yaxis.set_ticklabels(['', '0', '1'])
+    ax.yaxis.set_ticklabels(['', '0', '', '1'])
+
+    # set the color of the text in the confusion matrix
+    cthresh = cm.max() / 1.1
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         ax.text(j, i, format(cm[i, j], 'd'),
                 horizontalalignment="center",
-                )
+                color="white" if cm[i, j] > cthresh else "black")
+
 plt.tight_layout()
 plt.show()
 

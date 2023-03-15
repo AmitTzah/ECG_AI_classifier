@@ -13,3 +13,4 @@ X_train.npy
 best_knn.joblib
 knn_accuracy_graph.png
 Y_pred_knn.npy
+knn_confusion_matrix_for_test_data.png
