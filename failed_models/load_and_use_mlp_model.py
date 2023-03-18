@@ -9,28 +9,26 @@ import os
 import matplotlib.pyplot as plt
 import itertools
 
-# load the random_forest.joblib model
-rf = load('random_forest.joblib')
+# load the mlp_biased.joblib model
+mlp = load('mlp_biased.joblib')
 
 # Verify the type of model
 
-print("Type of model: ", type(rf))
+print("Type of model: ", type(mlp))
 
 # load X_test.npy and Y_test.npy
 X_test = np.load('X_test.npy')
 Y_test = np.load('Y_test.npy')
 
-# if 'Y_pred_rf.npy' file exists, load it and use it to calculate the accuracy and hamming loss
-# else, use the model to predict the labels of the test data and save the predicted labels to a .npy file
 
-if 'Y_pred_rf.npy' in os.listdir():
-    Y_pred = np.load('Y_pred_rf.npy')
+if 'Y_pred_mlp_biased.npy' in os.listdir():
+    Y_pred = np.load('Y_pred_mlp_biased.npy')
 
 else:
     # predict the labels of the test data
-    Y_pred = rf.predict(X_test)
+    Y_pred = mlp.predict(X_test)
     # save the predicted labels to a .npy file
-    np.save('Y_pred_rf.npy', Y_pred)
+    np.save('Y_pred_mlp_biased.npy', Y_pred)
 
 # calculate the accuracy of the model on the test data
 accuracy = accuracy_score(Y_test, Y_pred)

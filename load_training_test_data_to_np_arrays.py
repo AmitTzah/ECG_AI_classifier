@@ -88,7 +88,44 @@ for diagnosis in test_diagnoses:
 Y_test = np.array(Y_test)
 
 # save the Y_test, Y_train, X_test, X_train to directory so that we can use them in the other models
-np.save('Y_test.npy', Y_test)
-np.save('Y_train.npy', Y_train)
-np.save('X_test.npy', X_test)
-np.save('X_train.npy', X_train)
+# check if those files already exist, if they do, don't save them again
+if not os.path.exists('Y_test.npy') and not os.path.exists('Y_train.npy') and not os.path.exists('X_test.npy') and not os.path.exists('X_train.npy'):
+
+    np.save('Y_test.npy', Y_test)
+    np.save('Y_train.npy', Y_train)
+    np.save('X_test.npy', X_test)
+    np.save('X_train.npy', X_train)
+
+# It looks like, since the data is biased towards not having a heart condition (except sinus rhythm which is the standard), the model chose to simply label everything as "false", take the  small False Negatives  loss (since there aren't many negatives in the data anyway) and thus minimize the loss, at the cost of being completely useless at actually predicting a diagnoses.
+# The solution is to artificially increase the number of positive examples in the training data, by duplicating the positive examples in the training data.
+# This is called "data augmentation" and is a common technique to deal with unbalanced data.
+# as such we will duplicate all the patients that have more than three diagnoses, and we will add them to the training data
+# We also remove the patients that have only one diagnosis in the "other" class, since they are not useful for training
+
+X_train_biased = []
+Y_train_biased = []
+
+for i in range(len(Y_train)):
+    if np.sum(Y_train[i]) > 3:
+        X_train_biased.append(X_train[i])
+        Y_train_biased.append(Y_train[i]) 
+        X_train_biased.append(X_train[i])
+        Y_train_biased.append(Y_train[i])
+        X_train_biased.append(X_train[i])
+        Y_train_biased.append(Y_train[i])
+        X_train_biased.append(X_train[i])
+        Y_train_biased.append(Y_train[i])
+    elif np.sum(Y_train[i]) == 1 and Y_train[i][7] == 1:
+        continue
+    else:
+        X_train_biased.append(X_train[i])
+        Y_train_biased.append(Y_train[i])
+
+X_train_biased = np.array(X_train_biased)
+Y_train_biased = np.array(Y_train_biased)
+
+# save the biased data
+if not os.path.exists('Y_train_biased.npy') and not os.path.exists('X_train_biased.npy'):
+    np.save('Y_train_biased.npy', Y_train_biased)
+    np.save('X_train_biased.npy', X_train_biased)
+
