@@ -1,5 +1,5 @@
 from joblib import dump, load
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import multilabel_confusion_matrix
 
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
@@ -46,52 +46,26 @@ if 'X_test.npy' in os.listdir() and 'Y_test.npy' in os.listdir():
     Y_test = np.load('Y_test.npy')
 
 
+# remove the other class from Y_test (the last column)
+Y_test = np.delete(Y_test, 7, axis=1)
+
 # make a classification_reports folder if it doesn't exist
 if 'classification_reports' not in os.listdir():
     os.mkdir('classification_reports')
 
-
-# define a function to plot the confusion matrix
-def plot_confusion_matrix(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
-
-    print(cm)
-
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-
+# define y_pred list with the correct shape
+Y_pred = np.zeros((len(Y_test), 7))
 
 # predict the labels of the test data using the mlp models
 for i in range(7):
+
     # define the coorect labels for the current class
     Y_test_class = Y_test[:, i]
     Y_pred_class = classifiers[i][0].predict(X_test)
+
+    # add it to the y_pred list
+    Y_pred[:, i] = Y_pred_class
+
     # prrint the accuracy score, f1 score, precision score and recall score
     print('Accuracy score for ' +
           classes_names[i] + ' is: ' + str(accuracy_score(Y_test_class, Y_pred_class)))
@@ -113,13 +87,34 @@ for i in range(7):
         f.write('Recall score for ' + classes_names[i] + ' is: ' + str(
             recall_score(Y_test_class, Y_pred_class)) + ' \n')
 
-    # save the confusion matrix for the current class
-    # no need to use multilabel_confusion_matrix because the current class is binary
-    cm = confusion_matrix(Y_test_class, Y_pred_class)
-    # save the confusion matrix as a png file
-    plt.figure()
-    plot_confusion_matrix(cm, classes=[classes_names[i]],
-                          title='Confusion matrix, without normalization')
-    plt.savefig('classification_reports\confusion_matrix_' +
-                classes_names[i] + '.png')
-    plt.close()
+
+confusion_matrix = multilabel_confusion_matrix(Y_test, Y_pred)
+
+# plot confusion matrix per class all the subplots in one figure
+# there are 4 rows and 2 columns, but 7 plots, so the last plot will be empty
+fig, axes = plt.subplots(4, 2, figsize=(10, 10))
+axes = axes.ravel()
+for i, ax in enumerate(axes):
+
+    if i == 7:
+        # remove the last subplot
+        fig.delaxes(ax)
+        break
+
+    cm = confusion_matrix[i]
+    ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    ax.set_title(classes_names[i])
+    ax.set_xlabel("Predicted Label")
+    ax.set_ylabel("True Label")
+    ax.xaxis.set_ticklabels(['', '0', '1'])
+    ax.yaxis.set_ticklabels(['', '0', '', '1'])
+
+    # set the color of the text in the confusion matrix
+    cthresh = cm.max() / 1.1
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        ax.text(j, i, format(cm[i, j], 'd'),
+                horizontalalignment="center",
+                color="white" if cm[i, j] > cthresh else "black")
+
+plt.tight_layout()
+plt.show()
