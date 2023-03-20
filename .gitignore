@@ -15,3 +15,6 @@ knn_accuracy_graph.png
 Y_pred_knn.npy
 knn_confusion_matrix_for_test_data.png
 random_forest.joblib
+best_hyperparams_mlp.txt
+models/
+classification_reports/

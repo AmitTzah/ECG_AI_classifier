@@ -7,12 +7,28 @@ import joblib
 X_train = np.load('X_train.npy')
 Y_train = np.load('Y_train.npy')
 
+
+if 'best_hyperparams_mlp.txt' not in os.listdir():
+    best_hyperparams = {'hidden_layer_sizes': (100, 100)}
+
+else:
+
+    with open('best_hyperparams_mlp.txt', 'r') as f:
+        best_hyperparams = f.read()
+
+    # convert the string to a dictionary
+
+    best_hyperparams = eval(best_hyperparams)
+
+
 # Partition the problem into 7 different single label classes
 classifiers = []
 for i in range(7):
     y = Y_train[:, i]
-    clf = MLPClassifier(hidden_layer_sizes=(
-        100, 50), max_iter=75, verbose=10)
+
+    # define the classifier us
+    clf = MLPClassifier(
+        hidden_layer_sizes=best_hyperparams['hidden_layer_sizes'], max_iter=50, verbose=10)
     clf.fit(X_train, y)
     classifiers.append(clf)
 
@@ -31,8 +47,6 @@ if 'models' in os.listdir():
 
         os.remove(os.path.join('models', file))
 
-    # create the models folder
-    os.mkdir('models')
 
 else:
     os.mkdir('models')

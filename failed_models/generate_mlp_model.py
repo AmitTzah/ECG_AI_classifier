@@ -1,4 +1,4 @@
-# using Multilayer precepton to classify the ECG data
+# using multi label Multilayer precepton to classify the ECG data
 
 from sklearn.neural_network import MLPClassifier
 from joblib import dump, load

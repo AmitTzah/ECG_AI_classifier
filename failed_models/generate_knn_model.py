@@ -1,4 +1,4 @@
-# using KNN to classify the ECG data
+# using multi label KNN to classify the ECG data
 # generate a knn model with the best K value and save it as a joblib file
 
 import matplotlib.pyplot as plt
