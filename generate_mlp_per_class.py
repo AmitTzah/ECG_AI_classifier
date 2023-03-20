@@ -7,22 +7,6 @@ import joblib
 X_train = np.load('X_train.npy')
 Y_train = np.load('Y_train.npy')
 
-y_2= Y_train[:, 2]
-y_3= Y_train[:, 3]
-y_4 = Y_train[:, 4]
-y_5 = Y_train[:, 5]
-y_6 = Y_train[:, 6]
-y_7 = Y_train[:, 7]
-
-#print percentage of positive examples
-print(sum(y_2)/len(y_2))
-print(sum(y_3)/len(y_3))
-print(sum(y_4)/len(y_4))
-print(sum(y_5)/len(y_5))
-print(sum(y_6)/len(y_6))
-print(sum(y_7)/len(y_7))
-
-
 
 if 'best_hyperparams_mlp.txt' not in os.listdir():
     best_hyperparams = {'hidden_layer_sizes': (100, 100)}
@@ -41,14 +25,14 @@ else:
 classifiers = []
 for i in range(7):
     y = Y_train[:, i]
-    
 
     X_train_biased = X_train
-    #augment the data so it is biased towards positive examples, augment by 5 times
+    # augment the data so it is biased towards positive examples, augment by 5 times
     for j in range(len(y)):
         if y[j] == 1:
             for k in range(5):
-                X_train_biased = np.append(X_train_biased, [X_train[j]], axis=0)
+                X_train_biased = np.append(
+                    X_train_biased, [X_train[j]], axis=0)
                 y = np.append(y, [1], axis=0)
 
     # define the classifier us
