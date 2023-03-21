@@ -42,8 +42,8 @@ classifiers.sort(key=lambda x: x[1])
 
 # if X_test.npy and Y_test.npy exist, load them
 if 'X_test.npy' in os.listdir() and 'Y_test.npy' in os.listdir():
-    X_test = np.load('X_test.npy')
-    Y_test = np.load('Y_test.npy')
+    X_test = np.load('train_val_numpy_arrays/X_val.npy')
+    Y_test = np.load('train_val_numpy_arrays/Y_val.npy')
 
 
 # remove the other class from Y_test (the last column)

@@ -3,11 +3,6 @@ import numpy as np
 import os
 import joblib
 
-# Load the data
-X_train = np.load('X_train.npy')
-Y_train = np.load('Y_train.npy')
-
-
 if 'best_hyperparams_mlp.txt' not in os.listdir():
     best_hyperparams = {'hidden_layer_sizes': (100, 100)}
 
@@ -20,30 +15,9 @@ else:
 
     best_hyperparams = eval(best_hyperparams)
 
-
-# Partition the problem into 7 different single label classes
-classifiers = []
-for i in range(7):
-    y = Y_train[:, i]
-
-    X_train_biased = X_train
-    # augment the data so it is biased towards positive examples, augment by 5 times
-    for j in range(len(y)):
-        if y[j] == 1:
-            for k in range(5):
-                X_train_biased = np.append(
-                    X_train_biased, [X_train[j]], axis=0)
-                y = np.append(y, [1], axis=0)
-
-    # define the classifier us
-    clf = MLPClassifier(
-        hidden_layer_sizes=best_hyperparams['hidden_layer_sizes'], max_iter=50, verbose=10)
-    clf.fit(X_train_biased, y)
-    classifiers.append(clf)
-
-
 classes_names = ["sinus rhythm", "myocardial infarction", "left axis deviation",
                  "abnormal QRS", "left ventricular hypertrophy", "t wave abnormal", "myocardial ischemia", "other"]
+
 
 # Check if a "models" folder exists, if not create one
 # if it does, remove all the files in it and then create it
@@ -60,10 +34,29 @@ if 'models' in os.listdir():
 else:
     os.mkdir('models')
 
-# save the models in the models folder
+X_train_check = np.load('train_val_numpy_arrays/X_train.npy')
+Y_train_check = np.load('train_val_numpy_arrays/Y_train.npy')
 
-for i, clf in enumerate(classifiers):
 
-    # save the model using joblib
+# Partition the problem into 7 different single label classes
+for i in range(7):
+
+    if i == 0:
+        X_train = np.load(os.path.join(
+            "train_val_numpy_arrays", f'X_train_{classes_names[i]}.npy'))
+        Y_train = np.load(os.path.join("train_val_numpy_arrays",
+                                       f'y_train_{classes_names[i]}.npy'))
+    else:
+        # Load the data from the train_val_numpy_arrays folder
+        X_train = np.load(os.path.join(
+            "train_val_numpy_arrays", f'X_train_biased_{classes_names[i]}.npy'))
+        Y_train = np.load(os.path.join("train_val_numpy_arrays",
+                                       f'y_train_biased_{classes_names[i]}.npy'))
+
+    # add early stopping to the classifier to prevent overfitting
+    clf = MLPClassifier(
+        hidden_layer_sizes=best_hyperparams['hidden_layer_sizes'], max_iter=50, verbose=10, early_stopping=True)
+
+    clf.fit(X_train, Y_train)
 
     joblib.dump(clf, os.path.join('models', classes_names[i] + '.joblib'))

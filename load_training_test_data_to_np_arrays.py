@@ -9,6 +9,10 @@ train_diagnoses = []
 training_folder = "training_folder"
 validation_folder = "validation_folder"
 
+# if it doesn't exist, create a folder to save the training and test numpy arrays
+if not os.path.exists("train_val_numpy_arrays"):
+    os.mkdir("train_val_numpy_arrays")
+
 
 for file in os.listdir(f"{training_folder}"):
     if file.endswith(".mat"):
@@ -27,8 +31,8 @@ for file in os.listdir(f"{training_folder}"):
             if line.startswith('#Dx:'):
                 train_diagnoses.append(line[5:].strip())
 
-# Load the testing data
-X_test = []
+# Load the valiation data
+X_val = []
 test_diagnoses = []
 for file in os.listdir(f"{validation_folder}"):
     if file.endswith(".mat"):
@@ -37,7 +41,7 @@ for file in os.listdir(f"{validation_folder}"):
         mat_data = sio.loadmat(mat_file)['val']
         with open(header_file, 'r') as f:
             header = f.read()
-        X_test.append(mat_data)
+        X_val.append(mat_data)
         lines = header.split('\n')
         for line in lines:
             if line.startswith('#Dx:'):
@@ -50,12 +54,11 @@ for file in os.listdir(f"{validation_folder}"):
 most_common_diagnoses_array = [426783006, 164865005,
                                39732003, 164951009, 164873001, 164934002, 164861001]
 
+classes_names = ["sinus rhythm", "myocardial infarction", "left axis deviation",
+                 "abnormal QRS", "left ventricular hypertrophy", "t wave abnormal", "myocardial ischemia", "other"]
 
-# Convert the data to numpy arrays and reshape them
-X_train = np.array(X_train).reshape(len(X_train), -1)
-X_test = np.array(X_test).reshape(len(X_test), -1)
 
-# write the Y_train and Y_test
+# write the Y_train and Y_val
 # for each elemnt in X_train, the corresponding diagnosis is an array of 1 and 0
 # the array is of size 8, a 1 in the i-th position means that the diagnosis is the i-th most common diagnosis
 # if the diagnosis is not in the most common diagnoses, then the diagnosis is 'other', which is the 8-th diagnosis
@@ -70,12 +73,46 @@ for diagnosis in train_diagnoses:
             diagnosis_array[most_common_diagnoses_array.index(int(d))] = 1
         else:
             diagnosis_array[7] = 1
+
     Y_train.append(diagnosis_array)
 
+# augment the data so it is biased towards positive examples, augment by 3 times
+for i in range(7):
+
+    y_biased = [row[i] for row in Y_train]
+    # copy X_train to X_train_biased
+    X_train_biased = X_train.copy()
+
+    # augment the data so it is biased towards positive examples, augment by 4 times
+    if not i == 0:
+        for j in range(len(y_biased)):
+            print("current J is: ", j)
+            if y_biased[j] == 1:
+                for k in range(4):
+                    X_train_biased.append(X_train[j])
+                    y_biased.append(1)
+
+        np.save(os.path.join("train_val_numpy_arrays",
+                f'X_train_biased_{classes_names[i]}.npy'), np.array(X_train_biased).reshape(len(X_train_biased), -1))
+
+        np.save(os.path.join("train_val_numpy_arrays",
+                f'y_train_biased_{classes_names[i]}.npy'), np.array(y_biased))
+
+    else:
+        # don't augment the data for the first class
+
+        np.save(os.path.join("train_val_numpy_arrays",
+                f'X_train_{classes_names[i]}.npy'), np.array(X_train).reshape(len(X_train), -1))
+
+        np.save(os.path.join("train_val_numpy_arrays",
+                f'y_train_{classes_names[i]}.npy'), np.array(y_biased))
+
+        # Convert the data to numpy arrays and reshape them
+X_train = np.array(X_train).reshape(len(X_train), -1)
 # we convert the list to a numpy array because it is easier to work with
 Y_train = np.array(Y_train)
 
-Y_test = []
+Y_val = []
 for diagnosis in test_diagnoses:
     diagnosis_array = np.zeros(8)
     diagnosis = diagnosis.split(',')
@@ -84,48 +121,14 @@ for diagnosis in test_diagnoses:
             diagnosis_array[most_common_diagnoses_array.index(int(d))] = 1
         else:
             diagnosis_array[7] = 1
-    Y_test.append(diagnosis_array)
-Y_test = np.array(Y_test)
+    Y_val.append(diagnosis_array)
 
-# save the Y_test, Y_train, X_test, X_train to directory so that we can use them in the other models
-# check if those files already exist, if they do, don't save them again
-if not os.path.exists('Y_test.npy') and not os.path.exists('Y_train.npy') and not os.path.exists('X_test.npy') and not os.path.exists('X_train.npy'):
 
-    np.save('Y_test.npy', Y_test)
-    np.save('Y_train.npy', Y_train)
-    np.save('X_test.npy', X_test)
-    np.save('X_train.npy', X_train)
+X_val = np.array(X_val).reshape(len(X_val), -1)
+Y_val = np.array(Y_val)
 
-# It looks like, since the data is biased towards not having a heart condition (except sinus rhythm which is the standard), the model chose to simply label everything as "false", take the  small False Negatives  loss (since there aren't many negatives in the data anyway) and thus minimize the loss, at the cost of being completely useless at actually predicting a diagnoses.
-# The solution is to artificially increase the number of positive examples in the training data, by duplicating the positive examples in the training data.
-# This is called "data augmentation" and is a common technique to deal with unbalanced data.
-# as such we will duplicate all the patients that have more than three diagnoses, and we will add them to the training data
-# We also remove the patients that have only one diagnosis in the "other" class, since they are not useful for training
 
-X_train_biased = []
-Y_train_biased = []
-
-for i in range(len(Y_train)):
-    if np.sum(Y_train[i]) > 3:
-        X_train_biased.append(X_train[i])
-        Y_train_biased.append(Y_train[i]) 
-        X_train_biased.append(X_train[i])
-        Y_train_biased.append(Y_train[i])
-        X_train_biased.append(X_train[i])
-        Y_train_biased.append(Y_train[i])
-        X_train_biased.append(X_train[i])
-        Y_train_biased.append(Y_train[i])
-    elif np.sum(Y_train[i]) == 1 and Y_train[i][7] == 1:
-        continue
-    else:
-        X_train_biased.append(X_train[i])
-        Y_train_biased.append(Y_train[i])
-
-X_train_biased = np.array(X_train_biased)
-Y_train_biased = np.array(Y_train_biased)
-
-# save the biased data
-if not os.path.exists('Y_train_biased.npy') and not os.path.exists('X_train_biased.npy'):
-    np.save('Y_train_biased.npy', Y_train_biased)
-    np.save('X_train_biased.npy', X_train_biased)
-
+np.save(os.path.join("train_val_numpy_arrays", 'Y_val.npy'), Y_val)
+np.save(os.path.join("train_val_numpy_arrays", 'Y_train.npy'), Y_train)
+np.save(os.path.join("train_val_numpy_arrays", 'X_val.npy'), X_val)
+np.save(os.path.join("train_val_numpy_arrays", 'X_train.npy'), X_train)
