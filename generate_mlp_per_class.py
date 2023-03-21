@@ -34,24 +34,15 @@ if 'models' in os.listdir():
 else:
     os.mkdir('models')
 
-X_train_check = np.load('train_val_numpy_arrays/X_train.npy')
-Y_train_check = np.load('train_val_numpy_arrays/Y_train.npy')
-
 
 # Partition the problem into 7 different single label classes
 for i in range(7):
 
-    if i == 0:
-        X_train = np.load(os.path.join(
-            "train_val_numpy_arrays", f'X_train_{classes_names[i]}.npy'))
-        Y_train = np.load(os.path.join("train_val_numpy_arrays",
-                                       f'y_train_{classes_names[i]}.npy'))
-    else:
-        # Load the data from the train_val_numpy_arrays folder
-        X_train = np.load(os.path.join(
-            "train_val_numpy_arrays", f'X_train_biased_{classes_names[i]}.npy'))
-        Y_train = np.load(os.path.join("train_val_numpy_arrays",
-                                       f'y_train_biased_{classes_names[i]}.npy'))
+    # Load the data from the train_val_numpy_arrays folder
+    X_train = np.load(os.path.join(
+        "train_val_numpy_arrays", f'X_train_balanced_{classes_names[i]}.npy'))
+    Y_train = np.load(os.path.join("train_val_numpy_arrays",
+                                   f'y_train_balanced_{classes_names[i]}.npy'))
 
     # add early stopping to the classifier to prevent overfitting
     clf = MLPClassifier(

@@ -2,6 +2,8 @@
 import numpy as np
 import scipy.io as sio
 import os
+from sklearn.utils import resample
+from imblearn.under_sampling import RandomUnderSampler
 
 # Load the training data
 X_train = []
@@ -76,38 +78,29 @@ for diagnosis in train_diagnoses:
 
     Y_train.append(diagnosis_array)
 
-# augment the data so it is biased towards positive examples, augment by 3 times
+# save the unbalanced data per class
 for i in range(7):
 
-    y_biased = [row[i] for row in Y_train]
+    y_balanced = [row[i] for row in Y_train]
     # copy X_train to X_train_biased
-    X_train_biased = X_train.copy()
+    X_train_balanced = X_train.copy()
 
-    # augment the data so it is biased towards positive examples, augment by 4 times
-    if not i == 0:
-        for j in range(len(y_biased)):
-            print("current J is: ", j)
-            if y_biased[j] == 1:
-                for k in range(4):
-                    X_train_biased.append(X_train[j])
-                    y_biased.append(1)
+    X_train_balanced = np.array(X_train_balanced).reshape(
+        len(X_train_balanced), -1)
 
-        np.save(os.path.join("train_val_numpy_arrays",
-                f'X_train_biased_{classes_names[i]}.npy'), np.array(X_train_biased).reshape(len(X_train_biased), -1))
+    # use RandomUnderSampler to balance the data by downsampling the positive examples
+    rus = RandomUnderSampler(random_state=0)
+    X_train_balanced, y_balanced = rus.fit_resample(
+        X_train_balanced, y_balanced)
 
-        np.save(os.path.join("train_val_numpy_arrays",
-                f'y_train_biased_{classes_names[i]}.npy'), np.array(y_biased))
+    np.save(os.path.join("train_val_numpy_arrays",
+                         f'X_train_balanced_{classes_names[i]}.npy'), X_train_balanced)
 
-    else:
-        # don't augment the data for the first class
+    np.save(os.path.join("train_val_numpy_arrays",
+                         f'y_train_balanced_{classes_names[i]}.npy'), np.array(y_balanced))
 
-        np.save(os.path.join("train_val_numpy_arrays",
-                f'X_train_{classes_names[i]}.npy'), np.array(X_train).reshape(len(X_train), -1))
 
-        np.save(os.path.join("train_val_numpy_arrays",
-                f'y_train_{classes_names[i]}.npy'), np.array(y_biased))
-
-        # Convert the data to numpy arrays and reshape them
+# Convert the data to numpy arrays and reshape them
 X_train = np.array(X_train).reshape(len(X_train), -1)
 # we convert the list to a numpy array because it is easier to work with
 Y_train = np.array(Y_train)
