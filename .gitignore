@@ -19,3 +19,4 @@ best_hyperparams_mlp.txt
 models/
 classification_reports/
 train_val_numpy_arrays/
+test_data/

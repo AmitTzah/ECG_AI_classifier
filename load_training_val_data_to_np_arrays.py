@@ -2,7 +2,6 @@
 import numpy as np
 import scipy.io as sio
 import os
-from sklearn.utils import resample
 from imblearn.under_sampling import RandomUnderSampler
 
 # Load the training data
@@ -22,7 +21,6 @@ for file in os.listdir(f"{training_folder}"):
         header_file = os.path.join(f"{training_folder}", file[:-4] + ".hea")
 
         # Load the .mat file as a numpy array
-        # the [‘val’] is used to access the value of the key ‘val’ in the dictionary returned by loadmat() function.
         mat_data = sio.loadmat(mat_file)['val']
 
         with open(header_file, 'r') as f:
@@ -51,8 +49,6 @@ for file in os.listdir(f"{validation_folder}"):
 
 
 # define the most common diagnoses codes according to the distribution of the data:
-# from most common to least common
-# these are the classes we are going to predict, the rest of the classes will be grouped into the 'other' class
 most_common_diagnoses_array = [426783006, 164865005,
                                39732003, 164951009, 164873001, 164934002, 164861001]
 
@@ -61,13 +57,8 @@ classes_names = ["sinus rhythm", "myocardial infarction", "left axis deviation",
 
 
 # write the Y_train and Y_val
-# for each elemnt in X_train, the corresponding diagnosis is an array of 1 and 0
-# the array is of size 8, a 1 in the i-th position means that the diagnosis is the i-th most common diagnosis
-# if the diagnosis is not in the most common diagnoses, then the diagnosis is 'other', which is the 8-th diagnosis
 Y_train = []
 for diagnosis in train_diagnoses:
-    # diagnosis can also be of the format '426783006,164865005'
-    # in this case, we put a ones in the corresponding positions according to the most common diagnoses
     diagnosis_array = np.zeros(8)
     diagnosis = diagnosis.split(',')
     for d in diagnosis:
@@ -102,7 +93,6 @@ for i in range(7):
 
 # Convert the data to numpy arrays and reshape them
 X_train = np.array(X_train).reshape(len(X_train), -1)
-# we convert the list to a numpy array because it is easier to work with
 Y_train = np.array(Y_train)
 
 Y_val = []
@@ -122,6 +112,4 @@ Y_val = np.array(Y_val)
 
 
 np.save(os.path.join("train_val_numpy_arrays", 'Y_val.npy'), Y_val)
-np.save(os.path.join("train_val_numpy_arrays", 'Y_train.npy'), Y_train)
 np.save(os.path.join("train_val_numpy_arrays", 'X_val.npy'), X_val)
-np.save(os.path.join("train_val_numpy_arrays", 'X_train.npy'), X_train)

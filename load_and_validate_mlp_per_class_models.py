@@ -77,20 +77,19 @@ for i in range(7):
 
     # write these scores to a text file in the classification_reports folder for the current class
     with open('classification_reports\classification_report_' + classes_names[i] + '.txt', 'w') as f:
-        f.write('Accuracy score for ' + classes_names[i] + ' is: ' + str(
+        f.write('Accuracy score:' + str(
             accuracy_score(Y_test_class, Y_pred_class)) + ' \n')
-        f.write('F1 score for ' + classes_names[i] + ' is: ' +
-                str(f1_score(Y_test_class, Y_pred_class)) + ' \n')
-        f.write('Precision score for ' + classes_names[i] + ' is: ' + str(
-            precision_score(Y_test_class, Y_pred_class)) + ' \n')
-        f.write('Recall score for ' + classes_names[i] + ' is: ' + str(
-            recall_score(Y_test_class, Y_pred_class)) + ' \n')
+        f.write('F1 score: ' + str(
+            f1_score(Y_test_class, Y_pred_class)) + ' \n')
+        f.write('Precision score: ' +
+                str(precision_score(Y_test_class, Y_pred_class)) + ' \n')
+        f.write('Recall score: ' +
+                str(recall_score(Y_test_class, Y_pred_class)) + ' \n')
 
 
 confusion_matrix = multilabel_confusion_matrix(Y_test, Y_pred)
 
-# plot confusion matrix per class all the subplots in one figure
-# there are 4 rows and 2 columns, but 7 plots, so the last plot will be empty
+
 fig, axes = plt.subplots(4, 2, figsize=(10, 10))
 axes = axes.ravel()
 for i, ax in enumerate(axes):

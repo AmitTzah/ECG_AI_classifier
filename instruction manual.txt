@@ -1,0 +1,29 @@
+Required Python packages:
+
+sklearn
+numpy
+joblib
+matplotlib
+scipy
+imblearn
+
+To train and generate the models:
+
+1.Create a 'data' directory that contains all the .mat, .hea files.
+2.Run split_data_to_validation_training.py. The script will generate a training and validation folders with the split data.
+3.OPTIONAL: run graph_distribution_of_data.py to verify the distributions of the split data.
+4.Run load_training_val_data_to_np_arrays.py to load the data to numpy arrays. The arrays will be saved to disk as .npy files inside a train_val_numpy_arrays folder.
+5.OPTIONAL: run find_hyperparameters_mlp_per_class.py to do an exhustive grid search for the best hyper parameters.
+6.run generate_mlp_per_class.py to train the models and save them to the 'models' folder as '.joblib' files.
+7. Optional: run load_and_validate_mlp_per_class_models.py to test the models on the validation data folder.
+
+To use the models for new predictions:
+
+1.Create a 'test_data' folder that contains all the .mat, .hea files test data you want to make predictions on.
+
+2.Run predict_test_data.py.
+
+3.Scores can be viewed in the classification_reports folder. Results can be viewed in the generated confusion matrix figure.
+
+
+

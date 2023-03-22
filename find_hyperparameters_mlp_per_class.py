@@ -5,24 +5,26 @@ import numpy as np
 
 
 # Load the data
-X_train = np.load('X_train.npy')
-Y_train = np.load('Y_train.npy')
+X_train = np.load('train_val_numpy_arrays/X_train_balanced_abnormal QRS.npy')
+Y_train = np.load('train_val_numpy_arrays/Y_train_balanced_abnormal QRS.npy')
 
 # Define the parameter grid
 param_grid = {
-    'hidden_layer_sizes': [(100,), (100, 50), (100, 100), (50, 50, 50)],
+    'hidden_layer_sizes': [(100, 50, 50), (100, 100, 100), (100, 50, 50, 50, 50)],
+    'activation': ['logistic', 'tanh', 'relu'],
+    'learning_rate_init': [0.01, 0.001, 0.0001],
+    'early_stopping': [True, False],
+    'tol': [1e-4, 1e-5, 1e-6],
 
 }
 
 # Create the MLPClassifier
-clf = MLPClassifier(max_iter=35, verbose=10)
+clf = MLPClassifier(max_iter=100, verbose=10)
 
 # Use GridSearchCV to find the best hyperparameters
-grid_search = GridSearchCV(clf, param_grid, cv=3, n_jobs=None, verbose=10)
+grid_search = GridSearchCV(clf, param_grid, cv=3, n_jobs=4, verbose=10)
 
-y = Y_train[:, 3]
-
-grid_search.fit(X_train, y)
+grid_search.fit(X_train, Y_train)
 
 print("best hyperparameters: ", grid_search.best_params_)
 

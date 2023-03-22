@@ -4,7 +4,14 @@ import os
 import joblib
 
 if 'best_hyperparams_mlp.txt' not in os.listdir():
-    best_hyperparams = {'hidden_layer_sizes': (100, 100)}
+    best_hyperparams = {'hidden_layer_sizes': (100, 50, 50),
+                        'activation': 'logistic',
+                        'learning_rate_init': 0.01,
+                        'early_stopping': True,
+                        'tol': 0.00001,
+
+                        }
+
 
 else:
 
@@ -18,9 +25,6 @@ else:
 classes_names = ["sinus rhythm", "myocardial infarction", "left axis deviation",
                  "abnormal QRS", "left ventricular hypertrophy", "t wave abnormal", "myocardial ischemia", "other"]
 
-
-# Check if a "models" folder exists, if not create one
-# if it does, remove all the files in it and then create it
 
 if 'models' in os.listdir():
 
@@ -46,7 +50,12 @@ for i in range(7):
 
     # add early stopping to the classifier to prevent overfitting
     clf = MLPClassifier(
-        hidden_layer_sizes=best_hyperparams['hidden_layer_sizes'], max_iter=50, verbose=10, early_stopping=True)
+        hidden_layer_sizes=best_hyperparams['hidden_layer_sizes'],
+        activation=best_hyperparams['activation'],
+        learning_rate_init=best_hyperparams['learning_rate_init'],
+        tol=best_hyperparams['tol'],
+
+        max_iter=75, verbose=10, early_stopping=True)
 
     clf.fit(X_train, Y_train)
 
